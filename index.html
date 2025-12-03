@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ATOMS3 振り子加速度モニタ</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; }
+    #controls { margin-bottom: 8px; }
+    #status { margin-left: 8px; font-size: 0.9rem; }
+    canvas { border: 1px solid #ccc; width: 100%; max-width: 900px; height: 400px; }
+    #legend span { margin-right: 12px; font-size: 0.9rem; }
+    #tableSection { margin-top: 16px; max-width: 900px; display: none; }
+    #tableSection table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    #tableSection th, #tableSection td {
+      border: 1px solid #ccc; padding: 2px 4px; text-align: right; white-space: nowrap;
+    }
+    #tableSection thead { position: sticky; top: 0; background: #f3f3f3; }
+    #tableWrapper { max-height: 250px; overflow: auto; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>ATOMS3 振り子加速度モニタ</h1>
+  <div id="controls">
+    <button id="connectBtn">シリアル接続</button>
+    <button id="clearBtn">グラフクリア</button>
+    <button id="downloadBtn">CSVダウンロード</button>
+    <span id="status">未接続</span>
+  </div>
+  <div id="legend">
+    <span>ax (m/s²)</span>
+    <span>ay (m/s²)</span>
+    <span>az (m/s²)</span>
+  </div>
+  <canvas id="plot"></canvas>
+  <p style="max-width: 900px; font-size: 0.9rem;">
+    ※ Chrome / Edge など Web Serial API 対応ブラウザで使用してください。<br>
+    Arduino側のボーレートは <strong>115200</strong> に設定しています。
+  </p>
+
+  <section id="tableSection">
+    <h2 style="font-size: 1rem; margin: 4px 0;">データ表（コピー用）</h2>
+    <p style="font-size: 0.8rem; margin: 2px 0 6px;">
+      CSVダウンロード時のデータがここに表示されます。<br>
+      表の中をクリック → Ctrl+A → Ctrl+C でコピーし、Googleスプレッドシート等に貼り付けできます。
+    </p>
+    <div id="tableWrapper">
+      <table id="dataTable">
+        <thead>
+          <tr><th>t_s</th><th>ax_mps2</th><th>ay_mps2</th><th>az_mps2</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    const connectBtn  = document.getElementById('connectBtn');
+    const clearBtn    = document.getElementById('clearBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statusEl    = document.getElementById('status');
+    const canvas      = document.getElementById('plot');
+    const ctx         = canvas.getContext('2d');
+
+    const tableSection = document.getElementById('tableSection');
+    const dataTable    = document.getElementById('dataTable');
+    const tableBody    = dataTable.querySelector('tbody');
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = rect.width * window.devicePixelRatio;
+      canvas.height = 400 * window.devicePixelRatio;
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const maxPoints = 2000;
+    let data = [];
+
+    let port = null;
+    let reader = null;
+    let keepReading = false;
+    const textDecoder = new TextDecoder();
+    let readBuffer = '';
+
+    connectBtn.addEventListener('click', async () => {
+      try {
+        if (!('serial' in navigator)) {
+          alert('このブラウザは Web Serial API に対応していません。Chrome を使用してください。');
+          return;
+        }
+
+        if (!port) {
+          port = await navigator.serial.requestPort();
+          await port.open({ baudRate: 115200 });
+          statusEl.textContent = '接続済み';
+          connectBtn.textContent = '切断';
+          keepReading = true;
+          startReading();
+        } else {
+          keepReading = false;
+          if (reader) { try { await reader.cancel(); } catch (e) {} reader = null; }
+          try { await port.close(); } catch (e) {}
+          port = null;
+          statusEl.textContent = '未接続';
+          connectBtn.textContent = 'シリアル接続';
+        }
+      } catch (err) {
+        alert('シリアル接続に失敗しました: ' + err);
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      data = [];
+      draw();
+      tableBody.innerHTML = '';
+      tableSection.style.display = 'none';
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (data.length === 0) {
+        alert('保存・表示するデータがありません。');
+        return;
+      }
+      renderTableFromData();
+
+      let csv = 't_s,ax_mps2,ay_mps2,az_mps2\n';
+      for (const p of data) {
+        csv += [p.t.toFixed(4), p.ax.toFixed(4), p.ay.toFixed(4), p.az.toFixed(4)].join(',') + '\n';
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const now = new Date();
+      const filename = `atoms3_pendulum_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.csv`;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    function renderTableFromData() {
+      tableBody.innerHTML = '';
+      let html = '';
+      for (const p of data) {
+        html += `<tr><td>${p.t.toFixed(4)}</td><td>${p.ax.toFixed(4)}</td><td>${p.ay.toFixed(4)}</td><td>${p.az.toFixed(4)}</td></tr>`;
+      }
+      tableBody.innerHTML = html;
+      tableSection.style.display = 'block';
+    }
+
+    async function startReading() {
+      while (port && keepReading) {
+        try {
+          reader = port.readable.getReader();
+          for (;;) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) handleSerialData(value);
+          }
+        } catch (err) {
+          break;
+        } finally {
+          if (reader) reader.releaseLock();
+        }
+      }
+    }
+
+    function handleSerialData(value) {
+      readBuffer += textDecoder.decode(value, { stream: true });
+      const lines = readBuffer.split('\n');
+      readBuffer = lines.pop();
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line || line.startsWith('t_s')) continue;
+        const parts = line.split(',');
+        if (parts.length < 4) continue;
+
+        const t  = parseFloat(parts[0]);
+        const ax = parseFloat(parts[1]);
+        const ay = parseFloat(parts[2]);
+        const az = parseFloat(parts[3]);
+        if ([t,ax,ay,az].some(v=>isNaN(v))) continue;
+
+        data.push({ t, ax, ay, az });
+        if (data.length > maxPoints) data.shift();
+      }
+      draw();
+    }
+
+    function draw() {
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      if (data.length < 2) { drawAxes(); return; }
+
+      const tMin = data[0].t, tMax = data[data.length - 1].t;
+      const tRange = tMax - tMin || 1;
+
+      let aMin = Infinity, aMax = -Infinity;
+      for (const p of data) {
+        aMin = Math.min(aMin, p.ax, p.ay, p.az);
+        aMax = Math.max(aMax, p.ax, p.ay, p.az);
+      }
+      if (!isFinite(aMin)) { aMin=-10; aMax=10; }
+      if (aMax === aMin) { aMax+=1; aMin-=1; }
+      const aRange = aMax - aMin;
+
+      drawAxes(aMin, aMax);
+      drawLine(p=>p.ax, tMin, tRange, aMin, aRange);
+      drawLine(p=>p.ay, tMin, tRange, aMin, aRange);
+      drawLine(p=>p.az, tMin, tRange, aMin, aRange);
+    }
+
+    function drawAxes(aMin=-10, aMax=10) {
+      const w = canvas.width, h = canvas.height;
+      const L=60, R=20, T=20, B=40;
+
+      ctx.save();
+      ctx.strokeStyle='#999'; ctx.lineWidth=1*devicePixelRatio;
+      ctx.beginPath();
+      ctx.moveTo(L, h-B); ctx.lineTo(w-R, h-B);
+      ctx.moveTo(L, T);   ctx.lineTo(L, h-B);
+      ctx.stroke();
+
+      ctx.fillStyle='#333';
+      ctx.font = (10*devicePixelRatio)+'px system-ui';
+      const steps=5;
+      for (let i=0;i<=steps;i++){
+        const yVal = aMin + (aMax-aMin)*(i/steps);
+        const y = T + (h-T-B)*(1-i/steps);
+        ctx.beginPath();
+        ctx.moveTo(L-5,y); ctx.lineTo(L,y); ctx.stroke();
+        ctx.fillText(yVal.toFixed(1), 5*devicePixelRatio, y+3);
+      }
+      ctx.restore();
+    }
+
+    function drawLine(selector, tMin, tRange, aMin, aRange){
+      const w=canvas.width, h=canvas.height;
+      const L=60, R=20, T=20, B=40;
+
+      ctx.save();
+      ctx.lineWidth=1*devicePixelRatio;
+      ctx.beginPath();
+      let first=true;
+
+      for (const p of data) {
+        const x=L+(w-L-R)*((p.t-tMin)/tRange);
+        const y=(h-B)-(h-T-B)*((selector(p)-aMin)/aRange);
+        if(first){ ctx.moveTo(x,y); first=false; }
+        else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  </script>
+</body>
+</html>
