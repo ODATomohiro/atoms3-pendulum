@@ -3,61 +3,405 @@
 <head>
   <meta charset="UTF-8">
   <title>ATOMS3 振り子加速度モニタ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: system-ui, sans-serif; margin: 16px; }
-    #controls { margin-bottom: 8px; }
-    #status { margin-left: 8px; font-size: 0.9rem; }
-    canvas { border: 1px solid #ccc; width: 100%; max-width: 900px; height: 400px; }
-    #legend span { margin-right: 12px; font-size: 0.9rem; }
-    #tableSection { margin-top: 16px; max-width: 900px; display: none; }
-    #tableSection table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-    #tableSection th, #tableSection td {
-      border: 1px solid #ccc; padding: 2px 4px; text-align: right; white-space: nowrap;
+    :root {
+      --bg-gradient: radial-gradient(circle at top left, #e0f2fe, #eef2ff 40%, #f9fafb 80%);
+      --card-bg: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.06);
+      --border-subtle: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --ax-color: #f97373;
+      --ay-color: #22c55e;
+      --az-color: #06b6d4;
     }
-    #tableSection thead { position: sticky; top: 0; background: #f3f3f3; }
-    #tableWrapper { max-height: 250px; overflow: auto; border: 1px solid #ccc; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 12px 16px;
+    }
+    .shell { width: 100%; max-width: 1000px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 26px;
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+    header.card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+    .title-block h1 {
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .chip {
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      background: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #9ca3af;
+    }
+    .chip-dot.ax { background: var(--ax-color); }
+    .chip-dot.ay { background: var(--ay-color); }
+    .chip-dot.az { background: var(--az-color); }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 7px 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease, border-color 0.12s ease;
+      white-space: nowrap;
+    }
+    button span.icon { font-size: 0.9rem; }
+    #connectBtn {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+      padding-inline: 16px;
+    }
+    #connectBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.4);
+      background: #1d4ed8;
+    }
+    #clearBtn {
+      background: #f9fafb;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+    #clearBtn:hover { background: #f3f4f6; transform: translateY(-1px); }
+    #downloadBtn {
+      background: #ecfdf3;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    #downloadBtn:hover { background: #dcfce7; transform: translateY(-1px); }
+    #status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #f97316;
+      box-shadow: 0 0 0 3px rgba(248, 171, 96, 0.3);
+    }
+    .status-dot.connected {
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35);
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid rgba(209, 213, 219, 0.8);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+    .legend-dot.ax { background: var(--ax-color); }
+    .legend-dot.ay { background: var(--ay-color); }
+    .legend-dot.az { background: var(--az-color); }
+
+    .canvas-shell {
+      border-radius: 18px;
+      padding: 10px 14px 14px;
+      background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 55%);
+      border: 1px solid rgba(209, 213, 219, 0.8);
+      overflow: hidden;
+    }
+    canvas {
+      border-radius: 14px;
+      display: block;
+      width: 100%;
+      max-width: 960px;
+      height: 360px;
+      background: #ffffff;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hint-badge {
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      font-size: 0.7rem;
+      color: #1d4ed8;
+    }
+
+    #tableSection {
+      margin-top: 16px;
+      max-width: 100%;
+      display: none;
+    }
+    #tableHeaderRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    #tableHeaderRow h2 { font-size: 0.9rem; margin: 0; }
+    #tableHeaderRow .mini-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    #tableWrapper {
+      max-height: 260px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+    }
+    #dataTable {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.8rem;
+      min-width: 360px;
+    }
+    #dataTable thead {
+      position: sticky;
+      top: 0;
+      background: #e5f0ff;
+      z-index: 1;
+    }
+    #dataTable th,
+    #dataTable td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 4px 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    #dataTable th {
+      font-weight: 600;
+      color: #1f2937;
+      border-bottom: 1px solid #cbd5f5;
+    }
+    #dataTable tbody tr:nth-child(even) td { background: #f9fafb; }
+    #dataTable tbody tr:hover td { background: #eef2ff; }
+
+    .footer {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: #9ca3af;
+    }
+    .footer span {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(249, 250, 251, 0.7);
+      backdrop-filter: blur(6px);
+      display: inline-block;
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 16px 14px 14px; border-radius: 20px; }
+      header.card-header { flex-direction: column; align-items: flex-start; }
+      .chip-row { justify-content: flex-start; }
+      .controls-row { flex-direction: column; align-items: stretch; }
+      #status { margin-left: 0; }
+      canvas { height: 260px; }
+    }
   </style>
 </head>
 <body>
-  <h1>ATOMS3 振り子加速度モニタ</h1>
-  <div id="controls">
-    <button id="connectBtn">シリアル接続</button>
-    <button id="clearBtn">グラフクリア</button>
-    <button id="downloadBtn">CSVダウンロード</button>
-    <span id="status">未接続</span>
-  </div>
-  <div id="legend">
-    <span>ax (m/s²)</span>
-    <span>ay (m/s²)</span>
-    <span>az (m/s²)</span>
-  </div>
-  <canvas id="plot"></canvas>
-  <p style="max-width: 900px; font-size: 0.9rem;">
-    ※ Chrome / Edge など Web Serial API 対応ブラウザで使用してください。<br>
-    Arduino側のボーレートは <strong>115200</strong> に設定しています。
-  </p>
+  <main class="shell">
+    <section class="card">
+      <header class="card-header">
+        <div class="title-block">
+          <h1>
+            ATOMS3 振り子加速度モニタ
+            <span class="badge">Physics Lab · Web Serial</span>
+          </h1>
+          <p class="subtitle">
+            ATOMS3 の加速度センサからリアルタイムでデータを取得し、波形と表で確認できます。
+          </p>
+        </div>
+        <div class="chip-row">
+          <div class="chip">
+            <span class="chip-dot ax"></span>
+            ax: tangential?
+          </div>
+          <div class="chip">
+            <span class="chip-dot ay"></span>
+            ay: radial?
+          </div>
+          <div class="chip">
+            <span class="chip-dot az"></span>
+            az: gravity ref.
+          </div>
+        </div>
+      </header>
 
-  <section id="tableSection">
-    <h2 style="font-size: 1rem; margin: 4px 0;">データ表（コピー用）</h2>
-    <p style="font-size: 0.8rem; margin: 2px 0 6px;">
-      CSVダウンロード時のデータがここに表示されます。<br>
-      表の中をクリック → Ctrl+A → Ctrl+C でコピーし、Googleスプレッドシート等に貼り付けできます。
-    </p>
-    <div id="tableWrapper">
-      <table id="dataTable">
-        <thead>
-          <tr><th>t_s</th><th>ax_mps2</th><th>ay_mps2</th><th>az_mps2</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
+      <div class="controls-row">
+        <button id="connectBtn">
+          <span class="icon">🔗</span>
+          <span>シリアル接続</span>
+        </button>
+        <button id="clearBtn">
+          <span class="icon">🧹</span>
+          <span>グラフ・表クリア</span>
+        </button>
+        <button id="downloadBtn">
+          <span class="icon">💾</span>
+          <span>CSVダウンロード</span>
+        </button>
+        <div id="status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">未接続</span>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-dot ax"></span>
+          ax (m/s²)
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot ay"></span>
+          ay (m/s²)
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot az"></span>
+          az (m/s²)
+        </div>
+      </div>
+
+      <div class="canvas-shell">
+        <canvas id="plot"></canvas>
+      </div>
+
+      <div class="hint">
+        <span class="hint-badge">ヒント</span>
+        <span>
+          Chrome / Edge など Web Serial 対応ブラウザで使用してください。
+          Arduino 側のボーレートは <strong>115200</strong> に設定してください。
+        </span>
+      </div>
+
+      <section id="tableSection">
+        <div id="tableHeaderRow">
+          <h2>データ表（コピー用）</h2>
+          <div class="mini-hint">
+            表内をクリック → <strong>Ctrl+A</strong> → <strong>Ctrl+C</strong> でコピーし、スプレッドシート等に貼り付けできます。
+          </div>
+        </div>
+        <div id="tableWrapper">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th>t_s</th>
+                <th>ax_mps2</th>
+                <th>ay_mps2</th>
+                <th>az_mps2</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- JSで生成 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">
+      <span>Designed by ODA Tomohiro</span>
+    </footer>
+  </main>
 
   <script>
     const connectBtn  = document.getElementById('connectBtn');
     const clearBtn    = document.getElementById('clearBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const statusEl    = document.getElementById('status');
+    const statusDot   = document.getElementById('statusDot');
+    const statusText  = document.getElementById('statusText');
     const canvas      = document.getElementById('plot');
     const ctx         = canvas.getContext('2d');
 
@@ -68,7 +412,8 @@
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width  = rect.width * window.devicePixelRatio;
-      canvas.height = 400 * window.devicePixelRatio;
+      const targetHeightCss = window.innerWidth <= 640 ? 260 : 360;
+      canvas.height = targetHeightCss * window.devicePixelRatio;
       draw();
     }
     window.addEventListener('resize', resizeCanvas);
@@ -83,30 +428,47 @@
     const textDecoder = new TextDecoder();
     let readBuffer = '';
 
+    function setStatus(connected) {
+      if (connected) {
+        statusDot.classList.add('connected');
+        statusText.textContent = '接続済み';
+        connectBtn.firstElementChild.textContent = '🔌';
+        connectBtn.lastElementChild.textContent = '切断';
+      } else {
+        statusDot.classList.remove('connected');
+        statusText.textContent = '未接続';
+        connectBtn.firstElementChild.textContent = '🔗';
+        connectBtn.lastElementChild.textContent = 'シリアル接続';
+      }
+    }
+
     connectBtn.addEventListener('click', async () => {
       try {
         if (!('serial' in navigator)) {
-          alert('このブラウザは Web Serial API に対応していません。Chrome を使用してください。');
+          alert('このブラウザは Web Serial API に対応していません。Chrome / Edge を使用してください。');
           return;
         }
 
         if (!port) {
           port = await navigator.serial.requestPort();
           await port.open({ baudRate: 115200 });
-          statusEl.textContent = '接続済み';
-          connectBtn.textContent = '切断';
+          setStatus(true);
           keepReading = true;
           startReading();
         } else {
           keepReading = false;
-          if (reader) { try { await reader.cancel(); } catch (e) {} reader = null; }
+          if (reader) {
+            try { await reader.cancel(); } catch (e) {}
+            reader = null;
+          }
           try { await port.close(); } catch (e) {}
           port = null;
-          statusEl.textContent = '未接続';
-          connectBtn.textContent = 'シリアル接続';
+          setStatus(false);
         }
       } catch (err) {
+        console.error(err);
         alert('シリアル接続に失敗しました: ' + err);
+        setStatus(false);
       }
     });
 
@@ -124,19 +486,32 @@
       }
       renderTableFromData();
 
-      let csv = 't_s,ax_mps2,ay_mps2,az_mps2\n';
+      let csv = 't_s,ax_mps2,ay_mps2,az_mps2¥n';
       for (const p of data) {
-        csv += [p.t.toFixed(4), p.ax.toFixed(4), p.ay.toFixed(4), p.az.toFixed(4)].join(',') + '\n';
+        csv += [
+          p.t.toFixed(4),
+          p.ax.toFixed(4),
+          p.ay.toFixed(4),
+          p.az.toFixed(4)
+        ].join(',') + '¥n';
       }
 
       const blob = new Blob([csv], { type: 'text/csv' });
       const now = new Date();
-      const filename = `atoms3_pendulum_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.csv`;
+      const y  = now.getFullYear();
+      const m  = String(now.getMonth() + 1).padStart(2, '0');
+      const d  = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const filename = `atoms3_pendulum_${y}${m}${d}_${hh}${mm}${ss}.csv`;
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click();
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
@@ -145,7 +520,12 @@
       tableBody.innerHTML = '';
       let html = '';
       for (const p of data) {
-        html += `<tr><td>${p.t.toFixed(4)}</td><td>${p.ax.toFixed(4)}</td><td>${p.ay.toFixed(4)}</td><td>${p.az.toFixed(4)}</td></tr>`;
+        html += '<tr>' +
+          `<td>${p.t.toFixed(4)}</td>` +
+          `<td>${p.ax.toFixed(4)}</td>` +
+          `<td>${p.ay.toFixed(4)}</td>` +
+          `<td>${p.az.toFixed(4)}</td>` +
+          '</tr>';
       }
       tableBody.innerHTML = html;
       tableSection.style.display = 'block';
@@ -158,19 +538,25 @@
           for (;;) {
             const { value, done } = await reader.read();
             if (done) break;
-            if (value) handleSerialData(value);
+            if (value) {
+              handleSerialData(value);
+            }
           }
         } catch (err) {
+          console.error('read error:', err);
           break;
         } finally {
-          if (reader) reader.releaseLock();
+          if (reader) {
+            reader.releaseLock();
+            reader = null;
+          }
         }
       }
     }
 
     function handleSerialData(value) {
       readBuffer += textDecoder.decode(value, { stream: true });
-      const lines = readBuffer.split('\n');
+      const lines = readBuffer.split('¥n');
       readBuffer = lines.pop();
 
       for (let line of lines) {
@@ -183,75 +569,122 @@
         const ax = parseFloat(parts[1]);
         const ay = parseFloat(parts[2]);
         const az = parseFloat(parts[3]);
-        if ([t,ax,ay,az].some(v=>isNaN(v))) continue;
+        if (isNaN(t) || isNaN(ax) || isNaN(ay) || isNaN(az)) continue;
 
         data.push({ t, ax, ay, az });
-        if (data.length > maxPoints) data.shift();
+        if (data.length > maxPoints) {
+          data.shift();
+        }
       }
+
       draw();
     }
 
     function draw() {
-      const w = canvas.width, h = canvas.height;
+      const w = canvas.width;
+      const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
-      if (data.length < 2) { drawAxes(); return; }
 
-      const tMin = data[0].t, tMax = data[data.length - 1].t;
-      const tRange = tMax - tMin || 1;
+      if (data.length < 2) {
+        drawAxes();
+        return;
+      }
 
-      let aMin = Infinity, aMax = -Infinity;
+      const tMin = data[0].t;
+      const tMax = data[data.length - 1].t;
+      const tRange = tMax - tMin || 1.0;
+
+      let aMin = Infinity;
+      let aMax = -Infinity;
       for (const p of data) {
         aMin = Math.min(aMin, p.ax, p.ay, p.az);
         aMax = Math.max(aMax, p.ax, p.ay, p.az);
       }
-      if (!isFinite(aMin)) { aMin=-10; aMax=10; }
-      if (aMax === aMin) { aMax+=1; aMin-=1; }
+      if (!isFinite(aMin) || !isFinite(aMax)) {
+        aMin = -10;
+        aMax = 10;
+      }
+      if (aMax === aMin) {
+        aMax += 1;
+        aMin -= 1;
+      }
       const aRange = aMax - aMin;
 
       drawAxes(aMin, aMax);
-      drawLine(p=>p.ax, tMin, tRange, aMin, aRange);
-      drawLine(p=>p.ay, tMin, tRange, aMin, aRange);
-      drawLine(p=>p.az, tMin, tRange, aMin, aRange);
+
+      const styles = getComputedStyle(document.documentElement);
+      drawLine(p => p.ax, tMin, tRange, aMin, aRange, styles.getPropertyValue('--ax-color') || '#f97373');
+      drawLine(p => p.ay, tMin, tRange, aMin, aRange, styles.getPropertyValue('--ay-color') || '#22c55e');
+      drawLine(p => p.az, tMin, tRange, aMin, aRange, styles.getPropertyValue('--az-color') || '#06b6d4');
     }
 
-    function drawAxes(aMin=-10, aMax=10) {
-      const w = canvas.width, h = canvas.height;
-      const L=60, R=20, T=20, B=40;
+    function drawAxes(aMin = -10, aMax = 10) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const paddingLeft   = 60 * window.devicePixelRatio;
+      const paddingRight  = 20 * window.devicePixelRatio;
+      const paddingTop    = 24 * window.devicePixelRatio;
+      const paddingBottom = 40 * window.devicePixelRatio;
 
       ctx.save();
-      ctx.strokeStyle='#999'; ctx.lineWidth=1*devicePixelRatio;
+      ctx.strokeStyle = '#9ca3af';
+      ctx.lineWidth = 1 * window.devicePixelRatio;
       ctx.beginPath();
-      ctx.moveTo(L, h-B); ctx.lineTo(w-R, h-B);
-      ctx.moveTo(L, T);   ctx.lineTo(L, h-B);
+      ctx.moveTo(paddingLeft, h - paddingBottom);
+      ctx.lineTo(w - paddingRight, h - paddingBottom);
+      ctx.moveTo(paddingLeft, paddingTop);
+      ctx.lineTo(paddingLeft, h - paddingBottom);
       ctx.stroke();
 
-      ctx.fillStyle='#333';
-      ctx.font = (10*devicePixelRatio)+'px system-ui';
-      const steps=5;
-      for (let i=0;i<=steps;i++){
-        const yVal = aMin + (aMax-aMin)*(i/steps);
-        const y = T + (h-T-B)*(1-i/steps);
+      ctx.fillStyle = '#6b7280';
+      ctx.font = (10 * window.devicePixelRatio) + 'px system-ui';
+      const steps = 5;
+      for (let i = 0; i <= steps; i++) {
+        const yVal = aMin + (aMax - aMin) * (i / steps);
+        const y = paddingTop + (h - paddingTop - paddingBottom) * (1 - i / steps);
         ctx.beginPath();
-        ctx.moveTo(L-5,y); ctx.lineTo(L,y); ctx.stroke();
-        ctx.fillText(yVal.toFixed(1), 5*devicePixelRatio, y+3);
+        ctx.moveTo(paddingLeft - 5 * window.devicePixelRatio, y);
+        ctx.lineTo(paddingLeft, y);
+        ctx.stroke();
+        ctx.fillText(yVal.toFixed(1), 8 * window.devicePixelRatio, y + 3 * window.devicePixelRatio);
       }
+
       ctx.restore();
     }
 
-    function drawLine(selector, tMin, tRange, aMin, aRange){
-      const w=canvas.width, h=canvas.height;
-      const L=60, R=20, T=20, B=40;
+    function drawLine(selector, tMin, tRange, aMin, aRange, color) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const paddingLeft   = 60 * window.devicePixelRatio;
+      const paddingRight  = 20 * window.devicePixelRatio;
+      const paddingTop    = 24 * window.devicePixelRatio;
+      const paddingBottom = 40 * window.devicePixelRatio;
+
+      const x0 = paddingLeft;
+      const x1 = w - paddingRight;
+      const y0 = paddingTop;
+      const y1 = h - paddingBottom;
 
       ctx.save();
-      ctx.lineWidth=1*devicePixelRatio;
+      ctx.lineWidth = 1.4 * window.devicePixelRatio;
+      ctx.strokeStyle = color || '#2563eb';
       ctx.beginPath();
-      let first=true;
 
+      let first = true;
       for (const p of data) {
-        const x=L+(w-L-R)*((p.t-tMin)/tRange);
-        const y=(h-B)-(h-T-B)*((selector(p)-aMin)/aRange);
-        if(first){ ctx.moveTo(x,y); first=false; }
-        else ctx.lineTo(x,y);
+        const tNorm = (p.t - tMin) / tRange;
+        const aVal  = selector(p);
+        const aNorm = (aVal - aMin) / aRange;
+
+        const x = x0 + (x1 - x0) * tNorm;
+        const y = y1 - (y1 - y0) * aNorm;
+
+        if (first) {
+          ctx.moveTo(x, y);
+          first = false;
+        } else {
+          ctx.lineTo(x, y);
+        }
       }
       ctx.stroke();
       ctx.restore();
