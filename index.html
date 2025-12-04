@@ -19,15 +19,12 @@
       --az-color: #06b6d4;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg-gradient);
       color: var(--text-main);
       display: flex;
@@ -36,10 +33,7 @@
       padding: 24px 12px 16px;
     }
 
-    .shell {
-      width: 100%;
-      max-width: 1000px;
-    }
+    .shell { width: 100%; max-width: 1000px; }
 
     .card {
       background: var(--card-bg);
@@ -106,16 +100,9 @@
       border-radius: 999px;
       background: #9ca3af;
     }
-
-    .chip-dot.ax {
-      background: var(--ax-color);
-    }
-    .chip-dot.ay {
-      background: var(--ay-color);
-    }
-    .chip-dot.az {
-      background: var(--az-color);
-    }
+    .chip-dot.ax { background: var(--ax-color); }
+    .chip-dot.ay { background: var(--ay-color); }
+    .chip-dot.az { background: var(--az-color); }
 
     .controls-row {
       display: flex;
@@ -135,14 +122,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: transform 0.08s ease, box-shadow 0.08s ease,
-        background 0.12s ease, border-color 0.12s ease;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease, border-color 0.12s ease;
       white-space: nowrap;
     }
 
-    button span.icon {
-      font-size: 0.9rem;
-    }
+    button span.icon { font-size: 0.9rem; }
 
     #connectBtn {
       background: var(--accent);
@@ -161,20 +145,14 @@
       color: var(--text-main);
       border: 1px solid var(--border-subtle);
     }
-    #clearBtn:hover {
-      background: #f3f4f6;
-      transform: translateY(-1px);
-    }
+    #clearBtn:hover { background: #f3f4f6; transform: translateY(-1px); }
 
     #downloadBtn {
       background: #ecfdf3;
       color: #166534;
       border: 1px solid #bbf7d0;
     }
-    #downloadBtn:hover {
-      background: #dcfce7;
-      transform: translateY(-1px);
-    }
+    #downloadBtn:hover { background: #dcfce7; transform: translateY(-1px); }
 
     #status {
       font-size: 0.78rem;
@@ -221,25 +199,14 @@
       height: 10px;
       border-radius: 999px;
     }
-
-    .legend-dot.ax {
-      background: var(--ax-color);
-    }
-    .legend-dot.ay {
-      background: var(--ay-color);
-    }
-    .legend-dot.az {
-      background: var(--az-color);
-    }
+    .legend-dot.ax { background: var(--ax-color); }
+    .legend-dot.ay { background: var(--ay-color); }
+    .legend-dot.az { background: var(--az-color); }
 
     .canvas-shell {
       border-radius: 18px;
       padding: 10px 14px 14px;
-      background: radial-gradient(
-        circle at top left,
-        rgba(37, 99, 235, 0.08),
-        transparent 55%
-      );
+      background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 55%);
       border: 1px solid rgba(209, 213, 219, 0.8);
       overflow: hidden;
     }
@@ -285,10 +252,7 @@
       margin-bottom: 6px;
     }
 
-    #tableHeaderRow h2 {
-      font-size: 0.9rem;
-      margin: 0;
-    }
+    #tableHeaderRow h2 { font-size: 0.9rem; margin: 0; }
 
     #tableHeaderRow .mini-hint {
       font-size: 0.7rem;
@@ -331,13 +295,8 @@
       border-bottom: 1px solid #cbd5f5;
     }
 
-    #dataTable tbody tr:nth-child(even) td {
-      background: #f9fafb;
-    }
-
-    #dataTable tbody tr:hover td {
-      background: #eef2ff;
-    }
+    #dataTable tbody tr:nth-child(even) td { background: #f9fafb; }
+    #dataTable tbody tr:hover td { background: #eef2ff; }
 
     .footer {
       margin-top: 8px;
@@ -387,9 +346,7 @@
       font-size: 0.9rem;
     }
 
-    .modal-title {
-      font-weight: 600;
-    }
+    .modal-title { font-weight: 600; }
 
     .modal-buttons {
       display: flex;
@@ -432,61 +389,31 @@
       color: #ffffff;
       border-color: #16a34a;
     }
-
-    .btn-primary:hover {
-      background: #16a34a;
-    }
+    .btn-primary:hover { background: #16a34a; }
 
     .btn-light {
       background: #f3f4f6;
       color: #111827;
       border-color: #e5e7eb;
     }
-
-    .btn-light:hover {
-      background: #e5e7eb;
-    }
+    .btn-light:hover { background: #e5e7eb; }
 
     .btn-outline {
       background: #ffffff;
       color: #6b7280;
       border-color: #d1d5db;
     }
-
-    .btn-outline:hover {
-      background: #f9fafb;
-    }
+    .btn-outline:hover { background: #f9fafb; }
 
     @media (max-width: 640px) {
-      .card {
-        padding: 16px 14px 14px;
-        border-radius: 20px;
-      }
-      header.card-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .chip-row {
-        justify-content: flex-start;
-      }
-      .controls-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      #status {
-        margin-left: 0;
-      }
-      canvas {
-        height: 260px;
-      }
-      .modal-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .modal-buttons {
-        width: 100%;
-        justify-content: flex-start;
-      }
+      .card { padding: 16px 14px 14px; border-radius: 20px; }
+      header.card-header { flex-direction: column; align-items: flex-start; }
+      .chip-row { justify-content: flex-start; }
+      .controls-row { flex-direction: column; align-items: stretch; }
+      #status { margin-left: 0; }
+      canvas { height: 260px; }
+      .modal-header { flex-direction: column; align-items: flex-start; }
+      .modal-buttons { width: 100%; justify-content: flex-start; }
     }
   </style>
 </head>
@@ -504,34 +431,16 @@
           </p>
         </div>
         <div class="chip-row">
-          <div class="chip">
-            <span class="chip-dot ax"></span>
-            ax: tangential?
-          </div>
-          <div class="chip">
-            <span class="chip-dot ay"></span>
-            ay: radial?
-          </div>
-          <div class="chip">
-            <span class="chip-dot az"></span>
-            az: gravity ref.
-          </div>
+          <div class="chip"><span class="chip-dot ax"></span> ax: tangential?</div>
+          <div class="chip"><span class="chip-dot ay"></span> ay: radial?</div>
+          <div class="chip"><span class="chip-dot az"></span> az: gravity ref.</div>
         </div>
       </header>
 
       <div class="controls-row">
-        <button id="connectBtn">
-          <span class="icon">🔗</span>
-          <span>シリアル接続</span>
-        </button>
-        <button id="clearBtn">
-          <span class="icon">🧹</span>
-          <span>グラフ・表クリア</span>
-        </button>
-        <button id="downloadBtn">
-          <span class="icon">💾</span>
-          <span>CSVダウンロード</span>
-        </button>
+        <button id="connectBtn"><span class="icon">🔗</span><span>シリアル接続</span></button>
+        <button id="clearBtn"><span class="icon">🧹</span><span>グラフ・表クリア</span></button>
+        <button id="downloadBtn"><span class="icon">💾</span><span>CSVダウンロード</span></button>
         <div id="status">
           <span class="status-dot" id="statusDot"></span>
           <span id="statusText">未接続</span>
@@ -539,18 +448,9 @@
       </div>
 
       <div class="legend">
-        <div class="legend-item">
-          <span class="legend-dot ax"></span>
-          ax (m/s²)
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot ay"></span>
-          ay (m/s²)
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot az"></span>
-          az (m/s²)
-        </div>
+        <div class="legend-item"><span class="legend-dot ax"></span>ax (m/s²)</div>
+        <div class="legend-item"><span class="legend-dot ay"></span>ay (m/s²)</div>
+        <div class="legend-item"><span class="legend-dot az"></span>az (m/s²)</div>
       </div>
 
       <div class="canvas-shell">
@@ -593,7 +493,7 @@
     </footer>
 
     <!-- CSV / TSV モーダル -->
-    <div id="csvModal" class="modal-backdrop" style="display: none">
+    <div id="csvModal" class="modal-backdrop" style="display:none;">
       <div class="modal">
         <div class="modal-header">
           <div class="modal-title">データ</div>
@@ -623,7 +523,6 @@
     const dataTable = document.getElementById("dataTable");
     const tableBody = dataTable.querySelector("tbody");
 
-    // CSV / TSV モーダル関連
     const csvModal = document.getElementById("csvModal");
     const csvText = document.getElementById("csvText");
     const copyTsvBtn = document.getElementById("copyTsvBtn");
@@ -639,8 +538,8 @@
     let port = null;
     let reader = null;
     let keepReading = false;
-    const textDecoder = new TextDecoder();
-    let readBuffer = "";
+    const decoder = new TextDecoder();
+    let lineBuffer = "";
 
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
@@ -669,9 +568,7 @@
     connectBtn.addEventListener("click", async () => {
       try {
         if (!("serial" in navigator)) {
-          alert(
-            "このブラウザは Web Serial API に対応していません。Chrome / Edge を使用してください。"
-          );
+          alert("このブラウザは Web Serial API に対応していません。Chrome / Edge を使用してください。");
           return;
         }
 
@@ -684,14 +581,10 @@
         } else {
           keepReading = false;
           if (reader) {
-            try {
-              await reader.cancel();
-            } catch (e) {}
+            try { await reader.cancel(); } catch (e) {}
             reader = null;
           }
-          try {
-            await port.close();
-          } catch (e) {}
+          try { await port.close(); } catch (e) {}
           port = null;
           setStatus(false);
         }
@@ -716,8 +609,8 @@
       }
       renderTableFromData();
 
-      let csv = "t_s,ax_mps2,ay_mps2,az_mps2¥n";
-      let tsv = "t_s¥tax_mps2¥tay_mps2¥taz_mps2¥n";
+      let csv = "t_s,ax_mps2,ay_mps2,az_mps2\n";
+      let tsv = "t_s\tax_mps2\tay_mps2\taz_mps2\n";
 
       for (const p of data) {
         const rowArr = [
@@ -726,36 +619,30 @@
           p.ay.toFixed(4),
           p.az.toFixed(4),
         ];
-        csv += rowArr.join(",") + "¥n";
-        tsv += rowArr.join("¥t") + "¥n";
+        csv += rowArr.join(",") + "\n";
+        tsv += rowArr.join("\t") + "\n";
       }
 
       lastCsvText = csv;
       lastTsvText = tsv;
       csvText.value = tsv;
-
       csvModal.style.display = "flex";
     });
 
-    // 「コピー（TSV）」ボタン
     copyTsvBtn.addEventListener("click", async () => {
       if (!lastTsvText) return;
       try {
         await navigator.clipboard.writeText(lastTsvText);
         const original = copyTsvBtn.textContent;
         copyTsvBtn.textContent = "コピーしました";
-        setTimeout(() => {
-          copyTsvBtn.textContent = original;
-        }, 1200);
+        setTimeout(() => (copyTsvBtn.textContent = original), 1200);
       } catch (e) {
         alert("クリップボードにコピーできませんでした: " + e);
       }
     });
 
-    // 「CSV保存」ボタン
     saveCsvBtn.addEventListener("click", () => {
       if (!lastCsvText) return;
-
       const blob = new Blob([lastCsvText], { type: "text/csv" });
       const now = new Date();
       const y = now.getFullYear();
@@ -776,7 +663,6 @@
       URL.revokeObjectURL(url);
     });
 
-    // 「閉じる」ボタン
     closeModalBtn.addEventListener("click", () => {
       csvModal.style.display = "none";
     });
@@ -785,8 +671,7 @@
       tableBody.innerHTML = "";
       let html = "";
       for (const p of data) {
-        html +=
-          "<tr>" +
+        html += "<tr>" +
           `<td>${p.t.toFixed(4)}</td>` +
           `<td>${p.ax.toFixed(4)}</td>` +
           `<td>${p.ay.toFixed(4)}</td>` +
@@ -798,16 +683,24 @@
     }
 
     async function startReading() {
+      lineBuffer = "";
       while (port && keepReading) {
         try {
           reader = port.readable.getReader();
-          for (;;) {
+          while (true) {
             const { value, done } = await reader.read();
             if (done) break;
             if (value) {
-              const chunk = textDecoder.decode(value, { stream: true });
-              console.log("chunk:", chunk);
-              handleSerialChunk(chunk);
+              const text = decoder.decode(value, { stream: true });
+              console.log("chunk:", text);
+              lineBuffer += text;
+
+              let idx;
+              while ((idx = lineBuffer.indexOf("\n")) !== -1) {
+                let line = lineBuffer.slice(0, idx);
+                lineBuffer = lineBuffer.slice(idx + 1);
+                processLine(line);
+              }
             }
           }
         } catch (err) {
@@ -822,31 +715,23 @@
       }
     }
 
-    function handleSerialChunk(chunk) {
-      readBuffer += chunk;
-      const lines = readBuffer.split("¥n");
-      readBuffer = lines.pop();
+    function processLine(line) {
+      line = line.replace(/\r/g, "").trim();
+      if (!line) return;
+      if (line.startsWith("t_s")) return; // ヘッダ行スキップ
 
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
-        console.log("line:", line);
-        if (line.startsWith("t_s")) continue;
-        const parts = line.split(",");
-        if (parts.length < 4) continue;
+      console.log("line:", line);
+      const parts = line.split(",");
+      if (parts.length !== 4) return;
 
-        const t = parseFloat(parts[0]);
-        const ax = parseFloat(parts[1]);
-        const ay = parseFloat(parts[2]);
-        const az = parseFloat(parts[3]);
-        if (isNaN(t) || isNaN(ax) || isNaN(ay) || isNaN(az)) continue;
+      const t  = parseFloat(parts[0]);
+      const ax = parseFloat(parts[1]);
+      const ay = parseFloat(parts[2]);
+      const az = parseFloat(parts[3]);
+      if ([t, ax, ay, az].some(v => Number.isNaN(v))) return;
 
-        data.push({ t, ax, ay, az });
-        if (data.length > maxPoints) {
-          data.shift();
-        }
-      }
-
+      data.push({ t, ax, ay, az });
+      if (data.length > maxPoints) data.shift();
       draw();
     }
 
@@ -871,55 +756,31 @@
         aMax = Math.max(aMax, p.ax, p.ay, p.az);
       }
       if (!isFinite(aMin) || !isFinite(aMax)) {
-        aMin = -10;
-        aMax = 10;
+        aMin = -10; aMax = 10;
       }
-      if (aMax === aMin) {
-        aMax += 1;
-        aMin -= 1;
-      }
+      if (aMax === aMin) { aMax += 1; aMin -= 1; }
       const aRange = aMax - aMin;
 
       drawAxes(aMin, aMax);
 
       const styles = getComputedStyle(document.documentElement);
-      drawLine(
-        (p) => p.ax,
-        tMin,
-        tRange,
-        aMin,
-        aRange,
-        styles.getPropertyValue("--ax-color") || "#f97373"
-      );
-      drawLine(
-        (p) => p.ay,
-        tMin,
-        tRange,
-        aMin,
-        aRange,
-        styles.getPropertyValue("--ay-color") || "#22c55e"
-      );
-      drawLine(
-        (p) => p.az,
-        tMin,
-        tRange,
-        aMin,
-        aRange,
-        styles.getPropertyValue("--az-color") || "#06b6d4"
-      );
+      drawLine(p => p.ax, tMin, tRange, aMin, aRange, styles.getPropertyValue("--ax-color") || "#f97373");
+      drawLine(p => p.ay, tMin, tRange, aMin, aRange, styles.getPropertyValue("--ay-color") || "#22c55e");
+      drawLine(p => p.az, tMin, tRange, aMin, aRange, styles.getPropertyValue("--az-color") || "#06b6d4");
     }
 
     function drawAxes(aMin = -10, aMax = 10) {
       const w = canvas.width;
       const h = canvas.height;
-      const paddingLeft = 60 * window.devicePixelRatio;
-      const paddingRight = 20 * window.devicePixelRatio;
-      const paddingTop = 24 * window.devicePixelRatio;
-      const paddingBottom = 40 * window.devicePixelRatio;
+      const dpr = window.devicePixelRatio || 1;
+      const paddingLeft = 60 * dpr;
+      const paddingRight = 20 * dpr;
+      const paddingTop = 24 * dpr;
+      const paddingBottom = 40 * dpr;
 
       ctx.save();
       ctx.strokeStyle = "#9ca3af";
-      ctx.lineWidth = 1 * window.devicePixelRatio;
+      ctx.lineWidth = 1 * dpr;
       ctx.beginPath();
       ctx.moveTo(paddingLeft, h - paddingBottom);
       ctx.lineTo(w - paddingRight, h - paddingBottom);
@@ -928,34 +789,28 @@
       ctx.stroke();
 
       ctx.fillStyle = "#6b7280";
-      ctx.font = 10 * window.devicePixelRatio + "px system-ui";
+      ctx.font = 10 * dpr + "px system-ui";
       const steps = 5;
       for (let i = 0; i <= steps; i++) {
         const yVal = aMin + ((aMax - aMin) * i) / steps;
-        const y =
-          paddingTop +
-          ((h - paddingTop - paddingBottom) * (steps - i)) / steps;
+        const y = paddingTop + ((h - paddingTop - paddingBottom) * (steps - i)) / steps;
         ctx.beginPath();
-        ctx.moveTo(paddingLeft - 5 * window.devicePixelRatio, y);
+        ctx.moveTo(paddingLeft - 5 * dpr, y);
         ctx.lineTo(paddingLeft, y);
         ctx.stroke();
-        ctx.fillText(
-          yVal.toFixed(1),
-          8 * window.devicePixelRatio,
-          y + 3 * window.devicePixelRatio
-        );
+        ctx.fillText(yVal.toFixed(1), 8 * dpr, y + 3 * dpr);
       }
-
       ctx.restore();
     }
 
     function drawLine(selector, tMin, tRange, aMin, aRange, color) {
       const w = canvas.width;
       const h = canvas.height;
-      const paddingLeft = 60 * window.devicePixelRatio;
-      const paddingRight = 20 * window.devicePixelRatio;
-      const paddingTop = 24 * window.devicePixelRatio;
-      const paddingBottom = 40 * window.devicePixelRatio;
+      const dpr = window.devicePixelRatio || 1;
+      const paddingLeft = 60 * dpr;
+      const paddingRight = 20 * dpr;
+      const paddingTop = 24 * dpr;
+      const paddingBottom = 40 * dpr;
 
       const x0 = paddingLeft;
       const x1 = w - paddingRight;
@@ -963,7 +818,7 @@
       const y1 = h - paddingBottom;
 
       ctx.save();
-      ctx.lineWidth = 1.4 * window.devicePixelRatio;
+      ctx.lineWidth = 1.4 * dpr;
       ctx.strokeStyle = color || "#2563eb";
       ctx.beginPath();
 
@@ -976,12 +831,8 @@
         const x = x0 + (x1 - x0) * tNorm;
         const y = y1 - (y1 - y0) * aNorm;
 
-        if (first) {
-          ctx.moveTo(x, y);
-          first = false;
-        } else {
-          ctx.lineTo(x, y);
-        }
+        if (first) { ctx.moveTo(x, y); first = false; }
+        else { ctx.lineTo(x, y); }
       }
       ctx.stroke();
       ctx.restore();
