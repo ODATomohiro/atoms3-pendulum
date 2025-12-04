@@ -383,9 +383,7 @@
                 <th>az_mps2</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- JSで生成 -->
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </section>
@@ -397,6 +395,7 @@
   </main>
 
   <script>
+    // --- DOM取得 ---
     const connectBtn  = document.getElementById('connectBtn');
     const clearBtn    = document.getElementById('clearBtn');
     const downloadBtn = document.getElementById('downloadBtn');
@@ -409,6 +408,17 @@
     const dataTable    = document.getElementById('dataTable');
     const tableBody    = dataTable.querySelector('tbody');
 
+    // --- ここを先に定義（重要：data を先に作っておく）---
+    const maxPoints = 2000;
+    let data = [];
+
+    // シリアル関連
+    let port = null;
+    let reader = null;
+    let keepReading = false;
+    const textDecoder = new TextDecoder();
+    let readBuffer = '';
+
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width  = rect.width * window.devicePixelRatio;
@@ -417,16 +427,8 @@
       draw();
     }
     window.addEventListener('resize', resizeCanvas);
+    // 初期リサイズ
     resizeCanvas();
-
-    const maxPoints = 2000;
-    let data = [];
-
-    let port = null;
-    let reader = null;
-    let keepReading = false;
-    const textDecoder = new TextDecoder();
-    let readBuffer = '';
 
     function setStatus(connected) {
       if (connected) {
@@ -503,7 +505,7 @@
       const d  = String(now.getDate()).padStart(2, '0');
       const hh = String(now.getHours()).padStart(2, '0');
       const mm = String(now.getMinutes()).padStart(2, '0');
-      const ss = String(now.getSeconds()).padStart(2, '0');
+      const ss = String(now.getSeconds(), 10).padStart(2, '0');
       const filename = `atoms3_pendulum_${y}${m}${d}_${hh}${mm}${ss}.csv`;
 
       const url = URL.createObjectURL(blob);
